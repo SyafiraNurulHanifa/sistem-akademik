@@ -12,8 +12,14 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('email')->unique();
+            $table->string('password'); // kolom password untuk login
             $table->string('mapel');
             $table->string('telepon')->nullable();
+
+            // Tambahan standar untuk user auth
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+
             $table->timestamps();
         });
     }
