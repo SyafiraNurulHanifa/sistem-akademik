@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class AbsensiGuru extends Model
 {
@@ -26,14 +27,20 @@ class AbsensiGuru extends Model
     ];
 
     /**
-     * Casting otomatis
-     * Supaya check_in & check_out selalu jadi instance Carbon
+     * Casting otomatis untuk jam (biar rapi di JSON)
      */
     protected $casts = [
-        'tanggal'   => 'date',
-        'check_in'  => 'datetime',
-        'check_out' => 'datetime',
+        'check_in'  => 'datetime:H:i:s',
+        'check_out' => 'datetime:H:i:s',
     ];
+
+    /**
+     * Accessor → format tanggal menjadi "11 September 2025"
+     */
+    public function getTanggalAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->translatedFormat('d F Y') : null;
+    }
 
     /**
      * Relasi ke tabel guru
