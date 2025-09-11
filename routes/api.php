@@ -5,21 +5,36 @@ use App\Http\Controllers\AbsensiGuruController;
 use App\Http\Controllers\AuthGuruController;
 use App\Http\Controllers\GuruController;
 
-// Auth
+// ========== AUTH ==========
 Route::post('/guru/register', [GuruController::class, 'store']); // bebas akses
 Route::post('/guru/login', [AuthGuruController::class, 'login']);
 
+// ========== ROUTES YANG PERLU LOGIN ==========
 Route::middleware('auth:sanctum')->group(function () {
+
+    // ----- AUTH -----
     Route::post('/guru/logout', [AuthGuruController::class, 'logout']);
 
-    // Absensi
-    Route::post('/guru/absensi/check-in', [AbsensiGuruController::class, 'checkIn']);
-    Route::post('/guru/absensi/check-out', [AbsensiGuruController::class, 'checkOut']);
-    Route::get('/guru/absensi/riwayat', [AbsensiGuruController::class, 'riwayat']);
+    // ----- ABSENSI GURU -----
+    Route::prefix('guru/absensi')->group(function () {
+        Route::post('/check-in', [AbsensiGuruController::class, 'checkIn']);
+        Route::post('/check-out', [AbsensiGuruController::class, 'checkOut']);
+        Route::get('/riwayat', [AbsensiGuruController::class, 'riwayat']);
+    });
 
-    // CRUD Guru kecuali store
-    Route::get('/guru', [GuruController::class, 'index']);
-    Route::get('/guru/{id}', [GuruController::class, 'show']);
-    Route::put('/guru/{id}', [GuruController::class, 'update']);
-    Route::delete('/guru/{id}', [GuruController::class, 'destroy']);
+    // ----- ABSENSI ADMIN -----
+    Route::prefix('admin/absensi')->group(function () {
+        Route::post('/', [AbsensiGuruController::class, 'adminStore']); 
+        // nanti bisa ditambah list absensi semua guru, update, dll
+         Route::get('/{tanggal}', [AbsensiGuruController::class, 'listByDate']); 
+        // endpoint baru → menampilkan absensi semua guru berdasarkan tanggal
+    });
+
+    // ----- CRUD GURU (ADMIN) -----
+    Route::prefix('guru')->group(function () {
+        Route::get('/', [GuruController::class, 'index']);
+        Route::get('/{id}', [GuruController::class, 'show']);
+        Route::put('/{id}', [GuruController::class, 'update']);
+        Route::delete('/{id}', [GuruController::class, 'destroy']);
+    });
 });
