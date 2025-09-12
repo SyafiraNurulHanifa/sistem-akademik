@@ -18,8 +18,12 @@ class Guru extends Authenticatable
         'nama',
         'email',
         'password',
-        'mapel',
+        'mapel',          // masih dipakai di sistem absensi
         'telepon',
+        'nip',            // tambahan untuk profil
+        'jabatan',        // tambahan untuk profil
+        'tahun_masuk',    // tambahan untuk profil
+        'foto_profil',    // path file di storage
     ];
 
     /**
@@ -38,6 +42,7 @@ class Guru extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed', // otomatis hash saat create/update
+            'tahun_masuk'       => 'integer', // supaya saat return jadi angka
         ];
     }
 

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AbsensiGuruController;
 use App\Http\Controllers\AuthGuruController;
 use App\Http\Controllers\GuruController;
+use App\Http\Controllers\ProfilGuruController; // <-- pakai nama file kamu
 
 // ========== AUTH ==========
 Route::post('/guru/register', [GuruController::class, 'store']); // bebas akses
@@ -15,6 +16,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // ----- AUTH -----
     Route::post('/guru/logout', [AuthGuruController::class, 'logout']);
 
+    // ----- PROFIL GURU -----
+    Route::prefix('guru')->group(function () {
+        Route::get('/profile', [ProfilGuruController::class, 'show']);
+        Route::post('/profile', [ProfilGuruController::class, 'update']);
+    });
+
     // ----- ABSENSI GURU -----
     Route::prefix('guru/absensi')->group(function () {
         Route::post('/check-in', [AbsensiGuruController::class, 'checkIn']);
@@ -25,9 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ----- ABSENSI ADMIN -----
     Route::prefix('admin/absensi')->group(function () {
         Route::post('/', [AbsensiGuruController::class, 'adminStore']); 
-        // nanti bisa ditambah list absensi semua guru, update, dll
-         Route::get('/{tanggal}', [AbsensiGuruController::class, 'listByDate']); 
-        // endpoint baru → menampilkan absensi semua guru berdasarkan tanggal
+        Route::get('/{tanggal}', [AbsensiGuruController::class, 'listByDate']); 
     });
 
     // ----- CRUD GURU (ADMIN) -----
