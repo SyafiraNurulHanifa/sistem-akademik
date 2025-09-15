@@ -24,6 +24,8 @@ class AbsensiGuru extends Model
         'check_out',
         'foto_check_out',
         'status_check_out',
+        'latitude',
+        'longitude',
     ];
 
     /**
@@ -32,6 +34,17 @@ class AbsensiGuru extends Model
     protected $casts = [
         'check_in'  => 'datetime:H:i:s',
         'check_out' => 'datetime:H:i:s',
+    ];
+
+    /**
+     * Kolom tambahan otomatis ditampilkan di JSON
+     */
+    protected $appends = [
+        'foto_checkin_url',
+        'foto_checkout_url',
+        'jam_masuk',
+        'jam_pulang',
+        'lokasi',
     ];
 
     /**
@@ -80,5 +93,19 @@ class AbsensiGuru extends Model
     public function getJamPulangAttribute()
     {
         return $this->check_out ? $this->check_out->format('H:i:s') : null;
+    }
+
+    /**
+     * Accessor → Lokasi (latitude & longitude) digabung
+     */
+    public function getLokasiAttribute()
+    {
+        if ($this->latitude && $this->longitude) {
+            return [
+                'latitude'  => $this->latitude,
+                'longitude' => $this->longitude,
+            ];
+        }
+        return null;
     }
 }

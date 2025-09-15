@@ -16,7 +16,7 @@ return [
         // Sanctum untuk API token
         'api' => [
             'driver' => 'sanctum',
-            'provider' => null,
+            'provider' => 'gurus',
         ],
 
         // (opsional) guard session khusus guru kalau suatu saat perlu
