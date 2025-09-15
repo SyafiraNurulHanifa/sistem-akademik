@@ -30,13 +30,12 @@ class ProfilGuruController extends Controller
         $guru = $request->user();
 
         $rules = [
-            'nama' => 'sometimes|string|max:255',
-            // email otomatis dari registrasi → biasanya tidak bisa diubah
-            'nip' => 'sometimes|nullable|string|max:100',
-            'jabatan' => 'sometimes|nullable|string|max:255',
+            'nama'        => 'sometimes|string|max:255',
+            'nip'         => 'sometimes|nullable|string|max:100',
+            'jabatan'     => 'sometimes|nullable|string|max:255',
             'tahun_masuk' => 'sometimes|nullable|digits:4|integer|min:1900|max:' . date('Y'),
             'foto_profil' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
-            'password' => 'sometimes|nullable|string|min:6|confirmed',
+            'password'    => 'sometimes|nullable|string|min:6|confirmed',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -48,38 +47,33 @@ class ProfilGuruController extends Controller
             ], 422);
         }
 
-        // update field sederhana
-        $fillable = ['nama','nip','jabatan','tahun_masuk'];
-        foreach ($fillable as $f) {
-            if ($request->has($f)) {
-                $guru->{$f} = $request->input($f);
-            }
-        }
+        // ambil data yang boleh diupdate
+        $data = $request->only(['nama', 'nip', 'jabatan', 'tahun_masuk']);
 
-        // update password jika ada
+        // update password kalau ada
         if ($request->filled('password')) {
-            $guru->password = Hash::make($request->input('password'));
+            $data['password'] = $request->password; // hash otomatis dari casts di model
         }
 
-        // upload foto profil
+        // upload foto profil kalau ada
         if ($request->hasFile('foto_profil')) {
-            $file = $request->file('foto_profil');
-            $path = $file->store('guru', 'public'); // simpan di storage/app/public/guru/
+            $path = $request->file('foto_profil')->store('guru', 'public');
 
             // hapus foto lama jika ada
             if ($guru->foto_profil && Storage::disk('public')->exists($guru->foto_profil)) {
                 Storage::disk('public')->delete($guru->foto_profil);
             }
 
-            $guru->foto_profil = $path;
+            $data['foto_profil'] = $path;
         }
 
-        $guru->save();
+        // simpan perubahan
+        $guru->update($data);
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Profil berhasil diperbarui',
-            'data' => $this->transformGuru($guru),
+            'data'    => $this->transformGuru($guru),
         ], 200);
     }
 

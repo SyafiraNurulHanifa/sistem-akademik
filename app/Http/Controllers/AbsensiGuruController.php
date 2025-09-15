@@ -17,7 +17,7 @@ class AbsensiGuruController extends Controller
      */
     private function haversine($lat1, $lon1, $lat2, $lon2)
     {
-        $earthRadius = 6371000; // meter
+        $earthRadius = 6371; // meter
 
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lon2 - $lon1);
