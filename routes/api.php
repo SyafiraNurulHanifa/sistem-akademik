@@ -49,15 +49,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Absensi guru
         Route::prefix('absensi')->group(function () {
-            Route::post('/', [AbsensiGuruController::class, 'adminStore']);
+            Route::post('/', [AbsensiGuruController::class, 'adminStore']); //ini blm buat
             Route::get('/{tanggal}', [AbsensiGuruController::class, 'listByDate']);
         });
 
         // CRUD Guru
         Route::prefix('guru')->group(function () {
-            Route::get('/', [GuruController::class, 'index']);
-            Route::get('/{id}', [GuruController::class, 'show']);
-            Route::put('/{id}', [GuruController::class, 'update']);
+            Route::get('/', [GuruController::class, 'index']); //bisa
+            Route::get('/{id}', [GuruController::class, 'show']); //bisa
+            Route::put('/{id}', [GuruController::class, 'update']); //blm bisa
             Route::delete('/{id}', [GuruController::class, 'destroy']);
         });
     });
