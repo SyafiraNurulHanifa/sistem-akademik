@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart'; // import splash
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,13 +11,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // biar gak ada tulisan "debug"
+      debugShowCheckedModeBanner: false,
       title: 'My App',
-      theme: ThemeData(
-        fontFamily: 'Poppins', // pake font Poppins dari pubspec.yaml
-        primarySwatch: Colors.blue, // warna utama
-      ),
-      home: const SplashScreen(), // halaman pertama = splash
+      theme: ThemeData(fontFamily: 'Poppins', primarySwatch: Colors.blue),
+      home: const SplashScreen(),
     );
   }
 }
