@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 class GuruController extends Controller
 {
     /**
-     * GET /api/guru
+     * GET /api/admin/guru
      * Ambil semua data guru
      */
     public function index()
@@ -24,19 +24,20 @@ class GuruController extends Controller
     }
 
     /**
-     * POST /api/guru
-     * Tambah guru baru
+     * POST /api/admin/guru
+     * Tambah guru baru oleh admin
      */
     public function store(Request $request)
     {
         $data = $request->validate([
             'nama'     => 'required|string|max:255',
             'email'    => 'required|email|unique:gurus,email',
-            'mapel'    => 'required|string|max:255',
+            'jabatan'  => 'required|string|max:255',   // ✅ gunakan jabatan, bukan mapel
             'telepon'  => 'nullable|string|max:30',
             'password' => 'required|string|min:6',
         ]);
-        // Hash password sebelum disimpan
+
+        // Hash password secara manual (Cara A)
         $data['password'] = Hash::make($data['password']);
 
         $guru = Guru::create($data);
@@ -49,7 +50,7 @@ class GuruController extends Controller
     }
 
     /**
-     * GET /api/guru/{id}
+     * GET /api/admin/guru/{id}
      * Ambil detail guru
      */
     public function show($id)
@@ -63,7 +64,7 @@ class GuruController extends Controller
     }
 
     /**
-     * PUT /api/guru/{id}
+     * PUT /api/admin/guru/{id}
      * Update data guru
      */
     public function update(Request $request, $id)
@@ -73,10 +74,17 @@ class GuruController extends Controller
         $data = $request->validate([
             'nama'     => 'sometimes|required|string|max:255',
             'email'    => 'sometimes|required|email|unique:gurus,email,' . $guru->id,
-            'mapel'    => 'sometimes|required|string|max:255',
+            'jabatan'  => 'sometimes|required|string|max:255', // ✅ update jabatan
             'telepon'  => 'nullable|string|max:30',
-            'password' => 'sometimes|nullable|string|min:6', // ✅ fix: bisa update password
+            'password' => 'sometimes|nullable|string|min:6',
         ]);
+
+        // Jika password ada → hash, jika tidak → hapus dari $data
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
 
         $guru->update($data);
 
@@ -88,7 +96,7 @@ class GuruController extends Controller
     }
 
     /**
-     * DELETE /api/guru/{id}
+     * DELETE /api/admin/guru/{id}
      * Hapus guru
      */
     public function destroy($id)

@@ -18,12 +18,11 @@ class Guru extends Authenticatable
         'nama',
         'email',
         'password',
-        'mapel',          // masih dipakai di sistem absensi
+        'jabatan',       // gunakan ini untuk menyimpan jabatan (bukan mapel lagi)
         'telepon',
-        'nip',            // tambahan untuk profil
-        'jabatan',        // tambahan untuk profil
-        'tahun_masuk',    // tambahan untuk profil
-        'foto_profil',    // path file di storage
+        'nip',
+        'tahun_masuk',
+        'foto_profil',
     ];
 
     /**
@@ -41,8 +40,7 @@ class Guru extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed', // otomatis hash saat create/update
-            'tahun_masuk'       => 'integer', // supaya saat return jadi angka
+            'tahun_masuk'       => 'integer',
         ];
     }
 
@@ -50,7 +48,7 @@ class Guru extends Authenticatable
      * Relasi ke AbsensiGuru
      * (1 guru bisa punya banyak absensi)
      */
-    public function absensis()
+    public function absensiGuru()
     {
         return $this->hasMany(AbsensiGuru::class, 'guru_id');
     }

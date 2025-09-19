@@ -7,19 +7,7 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 class Kernel extends HttpKernel
 {
     /**
-     * Global middleware (jalan di semua request)
-     */
-    protected $middleware = [
-        \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
-        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
-        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-        \App\Http\Middleware\TrimStrings::class,
-        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-    ];
-
-    /**
-     * Middleware groups
+     * The application's route middleware groups.
      */
     protected $middlewareGroups = [
         'web' => [
@@ -32,24 +20,19 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // Sanctum middleware (hanya perlu kalau pakai SPA dengan cookie)
+            // ✅ Middleware untuk API dengan Sanctum
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-
-            // Rate limiting
-            'throttle:api',
-
-            // Route binding
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 
     /**
-     * Route middleware individual
+     * The application's route middleware.
      */
     protected $routeMiddleware = [
+        // Bawaan Laravel
         'auth'             => \App\Http\Middleware\Authenticate::class,
         'auth.basic'       => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'auth.session'     => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers'    => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can'              => \Illuminate\Auth\Middleware\Authorize::class,
         'guest'            => \App\Http\Middleware\RedirectIfAuthenticated::class,
@@ -58,7 +41,7 @@ class Kernel extends HttpKernel
         'throttle'         => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // 🔹 Custom middleware untuk role
+        // ✅ Custom Middleware Role untuk Admin & Guru
         'role'             => \App\Http\Middleware\RoleMiddleware::class,
     ];
 }

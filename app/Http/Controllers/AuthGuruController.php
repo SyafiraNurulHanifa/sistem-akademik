@@ -9,6 +9,44 @@ use App\Models\Guru;
 class AuthGuruController extends Controller
 {
     /**
+     * Register Guru
+     */
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'nama'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:gurus,email',
+            'jabatan'               => 'required|string|max:255',
+            'password'              => 'required|string|min:6|confirmed', 
+            // konfirmasi password wajib pakai field: password_confirmation
+        ]);
+
+        $guru = Guru::create([
+            'nama'     => $data['nama'],
+            'email'    => $data['email'],
+            'jabatan'  => $data['jabatan'],
+            'password' => Hash::make($data['password']), // ✅ pastikan hash disini
+        ]);
+
+        // ✅ Token dengan ability "guru"
+        $token = $guru->createToken('guru-token', ['guru'])->plainTextToken;
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Registrasi guru berhasil',
+            'data'    => [
+                'token' => $token,
+                'guru'  => [
+                    'id'      => $guru->id,
+                    'nama'    => $guru->nama,
+                    'email'   => $guru->email,
+                    'jabatan' => $guru->jabatan,
+                ]
+            ]
+        ], 201);
+    }
+
+    /**
      * Login Guru
      */
     public function login(Request $request)
@@ -27,8 +65,8 @@ class AuthGuruController extends Controller
             ], 401);
         }
 
-        // Buat token Sanctum
-        $token = $guru->createToken('guru-token')->plainTextToken;
+        // ✅ Token dengan ability "guru"
+        $token = $guru->createToken('guru-token', ['guru'])->plainTextToken;
 
         return response()->json([
             'status'  => 'success',
@@ -39,8 +77,7 @@ class AuthGuruController extends Controller
                     'id'      => $guru->id,
                     'nama'    => $guru->nama,
                     'email'   => $guru->email,
-                    'mapel'   => $guru->mapel,
-                    'telepon' => $guru->telepon,
+                    'jabatan' => $guru->jabatan,
                 ]
             ]
         ], 200);
@@ -60,7 +97,7 @@ class AuthGuruController extends Controller
     }
 
     /**
-     * Logout dari semua device (opsional)
+     * Logout dari semua device
      */
     public function logoutAll(Request $request)
     {
