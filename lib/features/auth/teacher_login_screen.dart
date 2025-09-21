@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'teacher_dashboard.dart';
+import '../teacher/teacher_dashboard.dart';
 
 class TeacherLoginScreen extends StatefulWidget {
   const TeacherLoginScreen({super.key});
