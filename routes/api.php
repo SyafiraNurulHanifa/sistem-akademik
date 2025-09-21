@@ -12,7 +12,7 @@ use App\Http\Controllers\ProfilGuruController;
 // ==========================
 
 // ---- GURU ----
-Route::post('/guru/register', [GuruController::class, 'store']);
+Route::post('/guru/register', [AuthGuruController::class, 'store']);
 Route::post('/guru/login', [AuthGuruController::class, 'login']);
 
 // ---- ADMIN ----
@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('absensi')->group(function () {
             Route::post('/', [AbsensiGuruController::class, 'adminStore']);
             Route::get('/{tanggal}', [AbsensiGuruController::class, 'listByDate']);
+            Route::put('/edit/{guru_id}/{tanggal}', [AbsensiGuruController::class, 'adminUpdate']);
         });
 
         // CRUD Guru

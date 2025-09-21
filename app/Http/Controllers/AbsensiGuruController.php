@@ -219,6 +219,72 @@ class AbsensiGuruController extends Controller
         ]);
     }
 
+
+    /**
+     * Admin input absensi guru secara manual
+     */
+    public function adminStore(Request $request)
+    {
+        $data = $request->validate([
+            'guru_id'          => 'required|exists:gurus,id',
+            'tanggal'          => 'required|date',
+            'check_in'         => 'nullable|date_format:H:i',
+            'check_out'        => 'nullable|date_format:H:i|after_or_equal:check_in',
+            'status_check_in'  => 'nullable|string|in:Masuk,Terlambat,Izin,Sakit,Alpa',
+            'status_check_out' => 'nullable|string|in:Belum Check-out,Berhasil,Izin,Sakit,Alpa',
+        ]);
+
+        // 🚨 Validasi tambahan: jika status = Sakit/Izin/Alpa, maka check_in & check_out harus kosong
+        if (in_array($data['status_check_in'], ['Sakit', 'Izin', 'Alpa'])) {
+            if (!empty($data['check_in']) || !empty($data['check_out'])) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Jika status Sakit/Izin/Alpa, maka check_in dan check_out harus kosong',
+                ], 422);
+            }
+
+            // pastikan status_check_out ikut disamakan
+            $data['status_check_out'] = $data['status_check_in'];
+        }
+
+        // pastikan tidak ada duplikat absensi untuk guru & tanggal tsb
+        $existing = AbsensiGuru::where('guru_id', $data['guru_id'])
+            ->whereDate('tanggal', $data['tanggal'])
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Absensi untuk guru ini pada tanggal tersebut sudah ada',
+                'data'    => $existing,
+            ], 422);
+        }
+
+        // siapkan data untuk create
+        $absensiData = [
+            'guru_id'          => $data['guru_id'],
+            'tanggal'          => $data['tanggal'],
+            'status_check_in'  => $data['status_check_in'] ?? 'Masuk',
+            'status_check_out' => $data['status_check_out'] ?? 'Belum Check-out',
+        ];
+
+        if (!empty($data['check_in'])) {
+            $absensiData['check_in'] = Carbon::parse($data['tanggal'].' '.$data['check_in']);
+        }
+
+        if (!empty($data['check_out'])) {
+            $absensiData['check_out'] = Carbon::parse($data['tanggal'].' '.$data['check_out']);
+        }
+
+        $absensi = AbsensiGuru::create($absensiData);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Absensi guru berhasil ditambahkan oleh admin',
+            'data'    => $absensi,
+        ], 201);
+    }
+
     /**
      * List absensi semua guru berdasarkan tanggal (untuk admin)
      */
@@ -231,6 +297,39 @@ class AbsensiGuruController extends Controller
 
         return response()->json([
             'tanggal' => $tanggal,
+            'data' => $absensi
+        ]);
+    }
+
+        /**
+     * Update absensi guru (khusus admin)
+     */
+    public function adminUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'status_check_in' => 'required|in:Masuk,Sakit,Izin,Alpa',
+            'check_in'  => 'nullable|date_format:H:i',
+            'check_out' => 'nullable|date_format:H:i',
+        ]);
+
+        $absensi = \App\Models\AbsensiGuru::findOrFail($id);
+
+        // Logika validasi otomatis:
+        // Kalau status Sakit/Izin/Alpa → check_in & check_out harus kosong
+        if (in_array($request->status_check_in, ['Sakit', 'Izin', 'Alpa'])) {
+            $absensi->status_check_in = $request->status_check_in;
+            $absensi->check_in = null;
+            $absensi->check_out = null;
+        } else {
+            $absensi->status_check_in = $request->status_check_in;
+            $absensi->check_in = $request->check_in;
+            $absensi->check_out = $request->check_out;
+        }
+
+        $absensi->save();
+
+        return response()->json([
+            'message' => 'Absensi guru berhasil diperbarui oleh admin',
             'data' => $absensi
         ]);
     }

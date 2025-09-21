@@ -5,9 +5,36 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Guru;
+use Illuminate\Http\Response;
 
 class AuthGuruController extends Controller
 {
+
+    /**
+     * POST /api/guru
+     * Tambah guru baru
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'nama'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:gurus,email',
+            'jabatan'  => 'required|string|max:255',
+            'telepon'  => 'nullable|string|max:30',
+            'password' => 'required|string|min:6',
+        ]);
+        // Hash password sebelum disimpan
+        $data['password'] = Hash::make($data['password']);
+
+        $guru = Guru::create($data);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Guru berhasil ditambahkan',
+            'data'    => $guru
+        ], Response::HTTP_CREATED);
+    }
+
     /**
      * Login Guru
      */
