@@ -152,7 +152,7 @@ class AbsensiGuruController extends Controller
     public function riwayat(Request $request)
     {
         $guru = $request->user();
-        $riwayat = $guru->absensis()->latest()->paginate(20);
+        $riwayat = $guru->absensiGuru()->latest()->paginate(20);
 
         return response()->json([
             'status'  => 'success',
@@ -170,7 +170,7 @@ class AbsensiGuruController extends Controller
         $bulan = now()->month;
         $tahun = now()->year;
 
-        $absensi = $guru->absensis()
+        $absensi = $guru->absensiGuru()
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->get();
