@@ -1,6 +1,8 @@
+// choose_option_screen.dart
 import 'package:flutter/material.dart';
 import 'student_login_screen.dart';
 import 'teacher_login_screen.dart';
+import '../../admin/admin_login_page.dart';
 
 class ChooseOptionScreen extends StatelessWidget {
   const ChooseOptionScreen({super.key});
@@ -41,7 +43,7 @@ class ChooseOptionScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(12.0),
                           child: Image.asset(
                             'assets/icons/logo.png',
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
@@ -51,57 +53,72 @@ class ChooseOptionScreen extends StatelessWidget {
               ],
             ),
           ),
+          
+          const SizedBox(height: 50),
+          const Text(
+            "Pilih Peran Anda",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E63D6),
+            ),
+          ),
+          const SizedBox(height: 30),
 
-          // Bagian bawah
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start, // mulai dari atas
-              children: [
-                const SizedBox(height: 40), // jarak lebih besar biar turun
-                const Text(
-                  "Choose your option",
-                  style: TextStyle(
-                    fontSize: 18, // sedikit lebih besar
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E63D6),
+          // Tombol pilihan
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceAround,
+                spacing: 20,
+                runSpacing: 20,
+                children: [
+                  // Tombol untuk Guru
+                  buildOption(
+                    context,
+                    icon: Icons.person_2,
+                    label: 'Guru',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TeacherLoginScreen(),
+                        ),
+                      );
+                    },
                   ),
-                ),
-                const SizedBox(height: 55),
-
-                // Tombol Student & Teacher
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    buildOption(
-                      context,
-                      icon: Icons.school,
-                      label: "Student",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const StudentLoginScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 80),
-                    buildOption(
-                      context,
-                      icon: Icons.person,
-                      label: "Teacher",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const TeacherLoginScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
+                  // Tombol untuk Siswa
+                  buildOption(
+                    context,
+                    icon: Icons.person_3,
+                    label: 'Siswa',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const StudentLoginScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  // Tombol untuk Admin
+                  buildOption(
+                    context,
+                    icon: Icons.admin_panel_settings,
+                    label: 'Admin',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminLoginPage(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -138,7 +155,7 @@ class ChooseOptionScreen extends StatelessWidget {
               icon,
               size: 48,
               color: Colors.white,
-            ), // icon lebih besar
+            ),
           ),
           const SizedBox(height: 10),
           Text(
