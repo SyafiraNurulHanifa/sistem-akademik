@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use App\Models\Admin;
+use Illuminate\Support\Facades\Hash;
 
 class AuthAdminController extends Controller
 {
@@ -14,21 +14,29 @@ class AuthAdminController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|email|unique:admins,email',
-            'password'              => 'required|string|min:6|confirmed',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|unique:admins,email',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $admin = Admin::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        // Hash password
+        $data['password'] = Hash::make($data['password']);
+
+        $admin = Admin::create($data);
+
+        $token = $admin->createToken('admin-token')->plainTextToken;
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Registrasi admin berhasil',
-            'data'    => $admin
+            'message' => 'Admin berhasil registrasi',
+            'data'    => [
+                'token' => $token,
+                'admin' => [
+                    'id'    => $admin->id,
+                    'name'  => $admin->name,
+                    'email' => $admin->email,
+                ]
+            ]
         ], 201);
     }
 
@@ -51,8 +59,7 @@ class AuthAdminController extends Controller
             ], 401);
         }
 
-        // ✅ Token dibuat dengan ability "admin" agar bisa diverifikasi RoleMiddleware
-        $token = $admin->createToken('admin-token', ['admin'])->plainTextToken;
+        $token = $admin->createToken('admin-token')->plainTextToken;
 
         return response()->json([
             'status'  => 'success',
@@ -69,7 +76,7 @@ class AuthAdminController extends Controller
     }
 
     /**
-     * Logout Admin
+     * Logout Admin (hapus token aktif saja)
      */
     public function logout(Request $request)
     {
@@ -82,7 +89,7 @@ class AuthAdminController extends Controller
     }
 
     /**
-     * Logout dari semua device
+     * Logout Admin dari semua device
      */
     public function logoutAll(Request $request)
     {
@@ -95,14 +102,18 @@ class AuthAdminController extends Controller
     }
 
     /**
-     * Profil Admin yang sedang login
+     * Data Admin yang sedang login
      */
     public function me(Request $request)
     {
         return response()->json([
             'status'  => 'success',
-            'message' => 'Data admin saat ini',
-            'data'    => $request->user()
+            'message' => 'Data admin yang sedang login',
+            'data'    => [
+                'id'    => $request->user()->id,
+                'name'  => $request->user()->name,
+                'email' => $request->user()->email,
+            ]
         ], 200);
     }
 }

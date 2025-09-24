@@ -1,108 +1,65 @@
 <?php
 
-namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AbsensiGuruController;
+use App\Http\Controllers\AuthGuruController;
+use App\Http\Controllers\AuthAdminController;
+use App\Http\Controllers\GuruController;
+use App\Http\Controllers\ProfilGuruController;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use App\Models\Admin;
+// ==========================
+// ROUTE TERBUKA (bebas akses)
+// ==========================
 
-class AuthAdminController extends Controller
-{
-    /**
-     * Register Admin
-     */
-    public function register(Request $request)
-    {
-        $data = $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|email|unique:admins,email',
-            'password'              => 'required|string|min:6|confirmed',
-        ]);
+// ---- GURU ----
+Route::post('/guru/register', [AuthGuruController::class, 'store']);
+Route::post('/guru/login', [AuthGuruController::class, 'login']);
 
-        $admin = Admin::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+// ---- ADMIN ----
+Route::post('/admin/register', [AuthAdminController::class, 'register']);
+Route::post('/admin/login', [AuthAdminController::class, 'login']);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Registrasi admin berhasil',
-            'data'    => $admin
-        ], 201);
-    }
+// ==========================
+// ROUTE YANG MEMBUTUHKAN LOGIN
+// ==========================
+Route::middleware('auth:sanctum')->group(function () {
 
-    /**
-     * Login Admin
-     */
-    public function login(Request $request)
-    {
-        $data = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
+    // ---- GURU ----
+    Route::prefix('guru')->group(function () {
+        Route::post('/logout', [AuthGuruController::class, 'logout']);
 
-        $admin = Admin::where('email', $data['email'])->first();
+        // Profil
+        Route::get('/profile', [ProfilGuruController::class, 'show']);
+        Route::put('/profile', [ProfilGuruController::class, 'update']);
 
-        if (!$admin || !Hash::check($data['password'], $admin->password)) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Email atau password salah',
-            ], 401);
-        }
+        // Absensi
+        Route::prefix('absensi')->group(function () {
+            Route::post('/check-in', [AbsensiGuruController::class, 'checkIn']);
+            Route::post('/check-out', [AbsensiGuruController::class, 'checkOut']);
+            Route::get('/riwayat', [AbsensiGuruController::class, 'riwayat']);
+            Route::get('/dashboard', [AbsensiGuruController::class, 'dashboard']);
+        });
+    });
 
-        // ✅ Token dibuat dengan ability "admin" agar bisa diverifikasi RoleMiddleware
-        $token = $admin->createToken('admin-token', ['admin'])->plainTextToken;
+    // ---- ADMIN ----
+    Route::prefix('admin')->group(function () {
+        Route::post('/logout', [AuthAdminController::class, 'logout']);
+        Route::post('/logout-all', [AuthAdminController::class, 'logoutAll']);
+        Route::get('/me', [AuthAdminController::class, 'me']);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Login berhasil',
-            'data'    => [
-                'token' => $token,
-                'admin' => [
-                    'id'    => $admin->id,
-                    'name'  => $admin->name,
-                    'email' => $admin->email,
-                ]
-            ]
-        ], 200);
-    }
+        // Absensi guru
+        Route::prefix('absensi')->group(function () {
+            Route::post('/', [AbsensiGuruController::class, 'adminStore']);
+            Route::get('/{tanggal}', [AbsensiGuruController::class, 'listByDate']);
+            Route::put('/edit/{guru_id}/{tanggal}', [AbsensiGuruController::class, 'adminUpdate']);
+        });
 
-    /**
-     * Logout Admin
-     */
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Logout berhasil',
-        ], 200);
-    }
-
-    /**
-     * Logout dari semua device
-     */
-    public function logoutAll(Request $request)
-    {
-        $request->user()->tokens()->delete();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Logout dari semua device berhasil',
-        ], 200);
-    }
-
-    /**
-     * Profil Admin yang sedang login
-     */
-    public function me(Request $request)
-    {
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Data admin saat ini',
-            'data'    => $request->user()
-        ], 200);
-    }
-}
+        // CRUD Guru
+        Route::prefix('guru')->group(function () {
+            Route::get('/', [GuruController::class, 'index']);
+            Route::get('/{id}', [GuruController::class, 'show']);
+            Route::put('/{id}', [GuruController::class, 'update']);
+            Route::delete('/{id}', [GuruController::class, 'destroy']);
+        });
+    });
+});
