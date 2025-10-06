@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../teacher/teacher_dashboard.dart';
+import '../student/dashboard.dart';
 
-class TeacherLoginScreen extends StatefulWidget {
-  const TeacherLoginScreen({super.key});
+class StudentLoginScreen extends StatefulWidget {
+  const StudentLoginScreen({super.key});
 
   @override
-  _TeacherLoginScreenState createState() => _TeacherLoginScreenState();
+  _StudentLoginScreenState createState() => _StudentLoginScreenState();
 }
 
-class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
+class _StudentLoginScreenState extends State<StudentLoginScreen> {
   bool _obscurePassword = true;
 
   @override
@@ -116,7 +116,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const TeacherDashboard(),
+                            builder: (context) => const StudentDashboard(),
                           ),
                         );
                       },

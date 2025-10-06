@@ -1,9 +1,45 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'teacher_attendance.dart';
-import 'teacher_profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/teacher_api.dart';
+import 'attendance.dart';
+import 'profile.dart';
 
-class TeacherDashboard extends StatelessWidget {
+class TeacherDashboard extends StatefulWidget {
   const TeacherDashboard({super.key});
+
+  @override
+  State<TeacherDashboard> createState() => _TeacherDashboardState();
+}
+
+class _TeacherDashboardState extends State<TeacherDashboard> {
+  String nama = "Teacher";
+  String? avatarPath;
+
+  String email = "john.doe@example.com";
+  String nip = "1234567890";
+  String jabatan = "Guru Matematika";
+  String tahunMasuk = "2020";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTeacherProfile();
+  }
+
+  Future<void> _loadTeacherProfile() async {
+    try {
+      final teacher = await TeacherApi.profile();
+      if (teacher != null && mounted) {
+        setState(() {
+          nama = teacher.nama;
+          email = teacher.email;
+        });
+      }
+    } catch (e) {
+      debugPrint("Gagal load profil guru: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,23 +59,43 @@ class TeacherDashboard extends StatelessWidget {
                   decoration: const BoxDecoration(
                     color: Color(0xFF27C2A0),
                     borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(300), // biar lebih bulat
+                      bottom: Radius.circular(300),
                     ),
                   ),
                 ),
                 Positioned(
                   bottom: -50,
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const TeacherProfile(),
+                          builder: (_) => TeacherProfile(
+                            initialData: {
+                              'nama': nama,
+                              'avatar': avatarPath,
+                              'email': email,
+                              'nip': nip,
+                              'jabatan': jabatan,
+                              'tahunMasuk': tahunMasuk,
+                            },
+                          ),
                         ),
                       );
+
+                      if (result != null && result is Map) {
+                        setState(() {
+                          nama = result['nama'] ?? nama;
+                          email = result['email'] ?? email;
+                          nip = result['nip'] ?? nip;
+                          jabatan = result['jabatan'] ?? jabatan;
+                          tahunMasuk = result['tahunMasuk'] ?? tahunMasuk;
+                          avatarPath = result['avatar'] ?? avatarPath;
+                        });
+                      }
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(6), // border hijau luar
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
@@ -51,11 +107,16 @@ class TeacherDashboard extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 55,
                         backgroundColor: Colors.grey[200],
-                        child: const Icon(
-                          Icons.person,
-                          size: 55,
-                          color: Colors.grey,
-                        ),
+                        backgroundImage: avatarPath != null
+                            ? FileImage(File(avatarPath!))
+                            : null,
+                        child: avatarPath == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 55,
+                                color: Colors.grey,
+                              )
+                            : null,
                       ),
                     ),
                   ),
@@ -80,27 +141,27 @@ class TeacherDashboard extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Welcome, Nadia Amelia",
-                          style: TextStyle(
+                          "Welcome, $nama!",
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
-                        Icon(
+                        const Icon(
                           Icons.arrow_forward,
                           color: Colors.white,
                           size: 20,
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
-                    Text(
+                    const SizedBox(height: 4),
+                    const Text(
                       "Have a great day teaching!",
                       style: TextStyle(color: Colors.white, fontSize: 14),
                     ),

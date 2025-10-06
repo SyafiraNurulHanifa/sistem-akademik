@@ -5,12 +5,17 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ">=3.9.0 <4.0.0"   
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  image_picker: ^1.0.7
+  geolocator: ^10.1.0
+  permission_handler: ^11.0.1
+  shared_preferences: ^2.2.2
+  http: ^0.13.6  
 
 dev_dependencies:
   flutter_test:

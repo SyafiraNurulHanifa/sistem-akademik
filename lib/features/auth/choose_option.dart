@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'student_login_screen.dart';
-import 'teacher_login_screen.dart';
+import 'student_login.dart';
+import 'teacher_login.dart';
 
 class ChooseOptionScreen extends StatelessWidget {
   const ChooseOptionScreen({super.key});

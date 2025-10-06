@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'choose_option_screen.dart';
+import 'choose_option.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
