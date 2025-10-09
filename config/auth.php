@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'defaults' => [
         'guard' => 'web',
         'passwords' => 'users',
@@ -13,16 +12,20 @@ return [
             'provider' => 'users',
         ],
 
-        // Sanctum untuk API token
-        'api' => [
+        // GUARD UNTUK SEMUA ROLE
+        'admin' => [
+            'driver' => 'sanctum',
+            'provider' => 'admins',
+        ],
+
+        'guru' => [
             'driver' => 'sanctum',
             'provider' => 'gurus',
         ],
 
-        // (opsional) guard session khusus guru kalau suatu saat perlu
-        'guru' => [
-            'driver' => 'session',
-            'provider' => 'gurus',
+        'siswa' => [
+            'driver' => 'sanctum',
+            'provider' => 'siswas',
         ],
     ],
 
@@ -31,9 +34,20 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
+        
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ],
+        
         'gurus' => [
             'driver' => 'eloquent',
             'model' => App\Models\Guru::class,
+        ],
+        
+        'siswas' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Siswa::class, // Buat model Siswa jika belum ada
         ],
     ],
 
@@ -47,5 +61,4 @@ return [
     ],
 
     'password_timeout' => 10800,
-
 ];

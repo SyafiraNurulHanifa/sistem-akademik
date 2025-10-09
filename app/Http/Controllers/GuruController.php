@@ -32,7 +32,7 @@ class GuruController extends Controller
         $data = $request->validate([
             'nama'     => 'required|string|max:255',
             'email'    => 'required|email|unique:gurus,email',
-            'mapel'    => 'required|string|max:255',
+            'jabatan'  => 'required|string|max:255',
             'telepon'  => 'nullable|string|max:30',
             'password' => 'required|string|min:6',
         ]);
