@@ -472,7 +472,7 @@ class _TeacherAttendanceState extends State<TeacherAttendance> {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Text(
-                    status!,
+                    status,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

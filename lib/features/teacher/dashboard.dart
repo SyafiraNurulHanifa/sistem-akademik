@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/teacher_api.dart';
 import 'attendance.dart';
 import 'profile.dart';

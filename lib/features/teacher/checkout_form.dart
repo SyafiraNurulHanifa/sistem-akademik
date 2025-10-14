@@ -118,7 +118,7 @@ class _CheckOutFormState extends State<CheckOutForm> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            value: _status,
+            initialValue: _status,
             items: const [
               DropdownMenuItem(value: "Hadir", child: Text("Hadir")),
               DropdownMenuItem(value: "Izin", child: Text("Izin")),

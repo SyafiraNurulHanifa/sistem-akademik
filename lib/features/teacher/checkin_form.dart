@@ -114,7 +114,7 @@ class _CheckInFormState extends State<CheckInForm> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            value: _status,
+            initialValue: _status,
             items: const [
               DropdownMenuItem(value: "Hadir", child: Text("Hadir")),
               DropdownMenuItem(value: "Izin", child: Text("Izin")),

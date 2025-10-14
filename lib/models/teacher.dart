@@ -7,7 +7,7 @@ class Teacher {
   final String? nip;
   final String? jabatan;
   final String? tahunMasuk;
-  final String? fotoProfil; // <- opsional, dari backend: foto_profil
+  final String? fotoProfil;
 
   Teacher({
     required this.id,

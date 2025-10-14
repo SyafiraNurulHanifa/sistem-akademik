@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../services/api_client.dart'; // ⬅️ nambah: panggil API
+import '../../services/teacher_api.dart'; // ⬅️ pakai TeacherApi (PUT JSON)
 
 class EditTeacherProfile extends StatefulWidget {
   final String nama;
@@ -9,7 +9,7 @@ class EditTeacherProfile extends StatefulWidget {
   final String nip;
   final String jabatan;
   final String tahunMasuk;
-  final String? avatar; // ✅ tambah avatar lama
+  final String? avatar; // preview lokal (belum upload ke server)
 
   const EditTeacherProfile({
     super.key,
@@ -32,7 +32,7 @@ class _EditTeacherProfileState extends State<EditTeacherProfile> {
   late TextEditingController jabatanController;
   late TextEditingController tahunMasukController;
 
-  File? _imageFile;
+  File? _imageFile; // hanya untuk preview lokal
   final ImagePicker _picker = ImagePicker();
   bool _saving = false;
 
@@ -47,80 +47,53 @@ class _EditTeacherProfileState extends State<EditTeacherProfile> {
 
     if (widget.avatar != null && widget.avatar!.trim().isNotEmpty) {
       final f = File(widget.avatar!);
-      if (f.existsSync()) {
-        _imageFile = f; // ✅ tampilkan foto lama kalau local file
-      }
+      if (f.existsSync()) _imageFile = f; // preview foto lama
     }
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-    }
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) setState(() => _imageFile = File(picked.path));
   }
 
   Future<void> _submit() async {
-    // Kirim ke API (multipart). Endpoint: PUT/POST /api/guru/profile (di route kamu pakai PUT).
-    // Karena ApiClient.multipartAuth hanya POST, kita pakai POST ke endpoint yang sama.
-    // Kalau backend-mu minta PUT, boleh tambahkan endpoint khusus di backend atau bikin method put multipart.
     setState(() => _saving = true);
-
     try {
-      final fields = <String, String>{
-        "nama": namaController.text.trim(),
-        "email": emailController.text.trim(),
-        "nip": nipController.text.trim(),
-        "jabatan": jabatanController.text.trim(),
-        "tahun_masuk": tahunMasukController.text.trim(),
-      };
-
-      final res = await ApiClient.multipartAuth(
-        "guru/profile", // ⬅️ sesuaikan jika backendmu require PUT, tapi POST ini sering dipakai untuk multipart update
-        fields: fields,
-        fileField: _imageFile != null ? "foto_profil" : null,
-        file: _imageFile,
+      final ok = await TeacherApi.updateProfile(
+        nama: namaController.text.trim(),
+        email: emailController.text.trim(),
+        nip: nipController.text.trim(),
+        jabatan: jabatanController.text.trim(),
+        tahunMasuk: tahunMasukController.text.trim(),
       );
 
-      if (res['status'] == 'success') {
-        // Ambil data balik (robust ke dua bentuk)
-        final d = (res['data'] ?? {}) as Map<String, dynamic>;
-        final guru = (d['guru'] ?? d) as Map<String, dynamic>;
+      if (!mounted) return;
+      setState(() => _saving = false);
 
-        // Foto bisa dikembalikan sebagai path/URL
-        final updatedAvatar =
-            (guru['foto_profil'] ?? guru['fotoProfil'] ?? widget.avatar);
-
-        if (!mounted) return;
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil berhasil disimpan')),
+        );
+        // kirim balik data ke dashboard untuk refresh cepat
         Navigator.pop(context, {
-          'nama': guru['nama'] ?? namaController.text,
-          'email': guru['email'] ?? emailController.text,
-          'nip': (guru['nip'] ?? nipController.text)?.toString(),
-          'jabatan': guru['jabatan'] ?? jabatanController.text,
-          'tahunMasuk':
-              (guru['tahun_masuk'] ??
-                      guru['tahunMasuk'] ??
-                      tahunMasukController.text)
-                  .toString(),
-          'avatar': _imageFile != null ? _imageFile!.path : updatedAvatar,
+          'nama': namaController.text.trim(),
+          'email': emailController.text.trim(),
+          'nip': nipController.text.trim(),
+          'jabatan': jabatanController.text.trim(),
+          'tahunMasuk': tahunMasukController.text.trim(),
+          'avatar': _imageFile?.path ?? widget.avatar, // hanya preview
         });
       } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['message']?.toString() ?? 'Gagal menyimpan'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Gagal menyimpan profil')));
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Terjadi kesalahan. Coba lagi.')),
-      );
-    } finally {
-      if (mounted) setState(() => _saving = false);
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -131,7 +104,7 @@ class _EditTeacherProfileState extends State<EditTeacherProfile> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // HEADER
+            // HEADER + preview foto
             Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
@@ -182,7 +155,6 @@ class _EditTeacherProfileState extends State<EditTeacherProfile> {
 
             const SizedBox(height: 70),
 
-            // FORM
             _buildField("Nama", namaController),
             _buildField("Email", emailController),
             _buildField("NIP", nipController),
@@ -191,7 +163,6 @@ class _EditTeacherProfileState extends State<EditTeacherProfile> {
 
             const SizedBox(height: 20),
 
-            // BUTTON SIMPAN
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: SizedBox(
