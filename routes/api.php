@@ -12,7 +12,7 @@ use App\Http\Controllers\ProfilGuruController;
 // ==========================
 
 // ---- GURU AUTH ----
-Route::post('/guru/register', [AuthGuruController::class, 'store']); // Bisa untuk admin atau self-register
+Route::post('/guru/register', [AuthGuruController::class, 'store']);
 Route::post('/guru/login', [AuthGuruController::class, 'login']);
 
 // ---- ADMIN AUTH ----
@@ -20,12 +20,13 @@ Route::post('/admin/register', [AuthAdminController::class, 'register']);
 Route::post('/admin/login', [AuthAdminController::class, 'login']);
 
 // ==========================
-// ROUTE DENGAN AUTHENTIKASI & AUTHORIZATION
+// ROUTE DENGAN AUTHENTIKASI
 // ==========================
 
 // ---- GURU ROUTES ----
-Route::middleware(['auth:guru', 'check.type:guru'])->prefix('guru')->group(function () {
+Route::middleware('auth:guru')->prefix('guru')->group(function () {
     Route::post('/logout', [AuthGuruController::class, 'logout']);
+    Route::post('/logout-all', [AuthGuruController::class, 'logoutAll']);
     
     // Profil
     Route::get('/profile', [ProfilGuruController::class, 'show']);
@@ -41,7 +42,7 @@ Route::middleware(['auth:guru', 'check.type:guru'])->prefix('guru')->group(funct
 });
 
 // ---- ADMIN ROUTES ----
-Route::middleware(['auth:admin', 'check.type:admin'])->prefix('admin')->group(function () {
+Route::middleware('auth:admin')->prefix('admin')->group(function () {
     // Auth Admin
     Route::post('/logout', [AuthAdminController::class, 'logout']);
     Route::post('/logout-all', [AuthAdminController::class, 'logoutAll']);
@@ -54,27 +55,55 @@ Route::middleware(['auth:admin', 'check.type:admin'])->prefix('admin')->group(fu
         Route::put('/edit/{id}', [AbsensiGuruController::class, 'adminUpdate']);
     });
     
-    // Guru Management (CRUD) - MENGGUNAKAN GURU CONTROLLER
+    // Guru Management (CRUD)
     Route::prefix('guru')->group(function () {
         Route::get('/', [GuruController::class, 'index']);
-        Route::post('/', [GuruController::class, 'store']); // Admin create guru
+        Route::post('/', [GuruController::class, 'store']);
         Route::get('/{id}', [GuruController::class, 'show']);
         Route::put('/{id}', [GuruController::class, 'update']);
         Route::delete('/{id}', [GuruController::class, 'destroy']);
     });
 });
 
+// ==========================
+// TEST ROUTES
+// ==========================
+/*Route::get('/test-server', function() {
+    return response()->json(['message' => 'Server is running!']);
+});
 
-//route test
-// Test route untuk cek middleware
-Route::get('/test-admin', function() {
-    return response()->json(['message' => 'Admin middleware works!']);
-})->middleware(['auth:admin', 'check.type:admin']);
+// Test guard-based authentication
+Route::get('/test-admin-guard', function() {
+    return response()->json([
+        'message' => 'Admin guard works!',
+        'user_type' => get_class(auth()->user())
+    ]);
+})->middleware('auth:admin');
 
-Route::get('/test-guru', function() {
-    return response()->json(['message' => 'Guru middleware works!']);
-})->middleware(['auth:guru', 'check.type:guru']);
+Route::get('/test-guru-guard', function() {
+    return response()->json([
+        'message' => 'Guru guard works!',
+        'user_type' => get_class(auth()->user())
+    ]);
+})->middleware('auth:guru');
+*/
 
-Route::get('/test-checktype-admin', function() {
-    return response()->json(['message' => 'Middleware check.type admin works!']);
-})->middleware('check.type:admin');
+// routes/api.php - TEST BASIC DULU
+Route::get('/test-simple', function() {
+    return response()->json(['message' => 'Basic test works']);
+});
+
+// Test tanpa guard dulu
+Route::get('/test-no-guard', function() {
+    return response()->json(['message' => 'No guard test works']);
+});
+
+// Test dengan auth sanctum umum
+Route::get('/test-auth-simple', function() {
+    $user = auth()->user();
+    return response()->json([
+        'message' => 'Auth simple works',
+        'user_exists' => !is_null($user),
+        'user_class' => $user ? get_class($user) : 'No user'
+    ]);
+})->middleware('auth:sanctum');

@@ -12,17 +12,25 @@ return [
             'provider' => 'users',
         ],
 
-        // GUARD UNTUK SEMUA ROLE
+        // ❌ HAPUS/COMMENT GUARD 'api' INI - INI PENYEBAB RECURSION
+        // 'api' => [
+        //     'driver' => 'sanctum',
+        //     'provider' => 'admins',
+        // ],
+
+        // ✅ GUARD UNTUK ADMIN
         'admin' => [
             'driver' => 'sanctum',
             'provider' => 'admins',
         ],
 
+        // ✅ GUARD UNTUK GURU
         'guru' => [
-            'driver' => 'sanctum',
+            'driver' => 'sanctum', 
             'provider' => 'gurus',
         ],
 
+        // ✅ GUARD UNTUK SISWA (jika ada)
         'siswa' => [
             'driver' => 'sanctum',
             'provider' => 'siswas',
@@ -30,9 +38,10 @@ return [
     ],
 
     'providers' => [
+        // ✅ KEMBALIKAN 'users' PROVIDER (wajib untuk Laravel)
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => App\Models\User::class, // Biarkan meski tidak dipakai
         ],
         
         'admins' => [
@@ -47,7 +56,7 @@ return [
         
         'siswas' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Siswa::class, // Buat model Siswa jika belum ada
+            'model' => App\Models\Siswa::class,
         ],
     ],
 
@@ -59,6 +68,4 @@ return [
             'throttle' => 60,
         ],
     ],
-
-    'password_timeout' => 10800,
 ];
